@@ -31,7 +31,7 @@ This project is a **Solidity-based platform** that allows the creation, minting,
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/BHAVIRS/your-repo.git
+    git clone https://github.com/BHAVIRS/tokenized_stock_market.git
     cd your-repo
     ```
 
