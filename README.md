@@ -6,65 +6,102 @@
 
 //By leveraging blockchain technology, we aim to create a decentralized platform that allows users to trade fractional shares of assets, making investing more affordable and inclusive for retail investors.
 
-## Overview
-This project is a **Solidity-based platform** that allows the creation, minting, burning, and trading of company-specific ERC-20 tokens. It integrates a marketplace where users can place buy and sell orders for company tokens, and it handles Ether transactions seamlessly. The project is designed to tokenize companies, allowing them to issue and manage their tokens through an Ethereum-based smart contract.
 
-## Key Features
-- **Company Token Creation**: Deploy ERC-20 tokens for companies with an initial supply.
-- **Minting & Burning**: Control token supply dynamically with minting and burning functions.
-- **Buy/Sell Marketplace**: Users can place buy and sell orders for tokens at a set price in Ether.
-- **Ether Transactions**: The smart contract accepts Ether, facilitating token purchases.
-- **Withdraw Ether**: Company contracts can withdraw Ether earned from token sales.
+## Overview
+This project is a **decentralized tokenization platform** built with Solidity, designed to allow companies to create, issue, and trade their own ERC-20 tokens. It includes an integrated **marketplace** where users can buy and sell tokens in exchange for Ether. The project supports flexible token management features, including minting, burning, and managing Ether balances. The marketplace also facilitates **price discovery** and **automated token trades** through buy/sell order matching.
+
+## Features
+- **Company Tokenization**: Companies can easily tokenize their business by creating their own ERC-20 tokens.
+- **Minting and Burning**: Dynamic supply management by minting and burning tokens, controlled by the MotherContract.
+- **Buy/Sell Order System**: Users can place buy and sell orders for company tokens, with automated order matching.
+- **Ether Transactions**: The contract accepts and handles Ether, enabling seamless token purchases and withdrawals.
+- **Price Conversion Utility**: A built-in function converts between Ether and token amounts for accurate pricing.
+- **Security**: Utilizes Solidity best practices, including **OpenZeppelin's** libraries for secure token and access control.
 
 ## Project Architecture
-- **CompanyToken Contract**: Represents a company as an ERC-20 token with minting, burning, and Ether management functionalities.
-- **MotherContract and Marketplace**: Central contract to manage multiple company tokens, place buy/sell orders, and execute transactions.
-- **Gas Management**: Efficient handling of gas fees for transactions on Ethereum, reducing costs.
 
-## Prerequisites
-- Solidity `^0.8.0`
-- OpenZeppelin Contracts (ERC-20, Ownable)
-- Ethereum-compatible development environment (e.g., [Remix](https://remix.ethereum.org), Hardhat, Truffle)
-- [MetaMask](https://metamask.io) or any other Ethereum wallet for deployment and interaction.
+### Contracts:
+- **CompanyToken**: ERC-20 token contract representing each company. Provides minting, burning, and Ether management features.
+- **MotherContractAndMarketplace**: Central contract that facilitates the creation of new companies, the management of their tokens, and the marketplace for trading those tokens.
 
+### Workflow:
+1. **Deploy the MotherContractAndMarketplace**: The central contract to manage all tokenized companies.
+2. **Create a Company**: The `create_company()` function deploys a new ERC-20 token with an initial supply and price.
+3. **Token Trading**: Users can buy or sell tokens through the marketplace by interacting with the functions `placeBuyOrder()` and `placeSellOrder()`.
+4. **Minting & Burning**: The contract owner can mint or burn tokens for a company based on business needs.
 
-## Smart Contract Overview
+### Gas Optimization
+- Functions have been optimized to avoid **infinite gas issues** in Remix and ensure efficient gas usage during large-scale transactions and order executions.
+- The use of **require** statements, minimal state changes, and optimized loops ensures reduced gas consumption.
 
-### `CompanyToken` Contract
-An ERC-20 token representing a company, with additional functionality:
-- **mint_tokens**: Mint new tokens (restricted to the `MotherContract`).
-- **burn_tokens**: Burn tokens (restricted to the `MotherContract`).
-- **withdrawEther**: Withdraw Ether from the contract (only for the contract owner).
+## Installation & Setup
 
-### `MotherContractAndMarketplace` Contract
-Central contract to manage company token creation and facilitate trading:
-- **create_company**: Deploy a new company token.
-- **mint_company_tokens**: Mint additional tokens for a specific company.
-- **placeBuyOrder**: Place a buy order for company tokens.
-- **placeSellOrder**: Sell tokens back to the marketplace.
+### Prerequisites
+- **Solidity**: `^0.8.0` or later
+- **Node.js** and **npm** for project dependencies (if using Hardhat or Truffle)
+- **MetaMask** or any Ethereum-compatible wallet for contract interaction
+- **OpenZeppelin Contracts** (ERC-20, Ownable)
 
 
-## Smart Contract Deployment Example
+## Functions
 
-Example for deploying and interacting using **Remix**:
+### CompanyToken Contract
+- **mint_tokens**: Mints new tokens for the company (only accessible by the MotherContract).
+- **burn_tokens**: Burns tokens from the company's supply.
+- **getEtherBalance**: Retrieves the current Ether balance held by the company’s contract.
+- **withdrawEther**: Withdraws Ether earned from token sales.
+
+### MotherContractAndMarketplace Contract
+- **create_company**: Deploys a new company-specific ERC-20 token contract.
+- **mint_company_tokens**: Mints additional tokens for a specific company.
+- **placeBuyOrder**: Users place a buy order for company tokens using Ether.
+- **placeSellOrder**: Users place a sell order to sell tokens back to the marketplace.
+- **convertEtherToToken**: Calculates the price conversion between Ether and tokens for a specific company.
+
+## Testing
+
+For running tests, you can use frameworks like **Hardhat** or **Truffle**:
+1. Write test cases to simulate buy/sell orders, token minting, and Ether withdrawals.
+2. Run tests using:
+    ```bash
+    npx hardhat test
+    ```
+
+## Roles in the Project
+The following roles have been defined to manage and develop the project:
+
+1. **Product Analyst**: Oversees the project scope and business requirements. Other possible titles: Business Analyst, Project Sponsor.
+2. **Scrum Master**: Ensures the project is running smoothly, managing workflow and solving issues within the team.
+3. **Blockchain Developers**: Implement the smart contracts and integrate the tokenization features with the marketplace.
+4. **Testers**: Conduct thorough testing of the smart contracts to ensure security and functionality.
+5. **UI/UX Designer**: (Optional) Creates a user-friendly frontend interface for interacting with the smart contracts.
+
+## Example Usage
+
 ```solidity
 // Deploy the MotherContract
 MotherContractAndMarketplace mother = new MotherContractAndMarketplace();
 
-// Create a new company
-mother.create_company("CompanyName", "CMP", 10000, 0.1 ether);
+// Create a company token
+mother.create_company("YourCompany", "YTC", 100000, 0.01 ether);
 
 // Place a buy order
-mother.placeBuyOrder(0, 50);
+mother.placeBuyOrder(0, 100);
 
 // Place a sell order
-mother.placeSellOrder(0, 30);
+mother.placeSellOrder(0, 50);
 ```
 
-## Contributing
-Feel free to submit issues, fork the repository, and create pull requests. Contributions are always welcome!
+## Contribution Guidelines
+
+Contributions are welcome! Feel free to:
+- Submit issues with bug reports or feature requests.
+- Fork the repo and create pull requests for new features or improvements.
 
 ## License
-This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the **MIT License**. Please see the [LICENSE](./LICENSE) file for details.
+
+## Contact
+For questions or feedback, please contact **bhavithranravi@gmail.com**
 
 ---
