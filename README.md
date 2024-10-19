@@ -31,7 +31,7 @@ This project is a **Solidity-based platform** that allows the creation, minting,
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/your-repo.git
+    git clone https://github.com/BHAVIRS/your-repo.git
     cd your-repo
     ```
 
@@ -66,12 +66,6 @@ Central contract to manage company token creation and facilitate trading:
 - **placeBuyOrder**: Place a buy order for company tokens.
 - **placeSellOrder**: Sell tokens back to the marketplace.
 
-## Project Roles
-- **Product Owner**: Define project requirements and business logic.
-- **Scrum Master**: Ensure smooth workflow and remove blockers.
-- **Developers**: Implement smart contracts and handle integrations.
-- **Testers**: Test the smart contracts for security and functionality.
-- **UI/UX Designer**: (Optional) Create a frontend for interacting with the contracts.
 
 ## Smart Contract Deployment Example
 
