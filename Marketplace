@@ -1,0 +1,224 @@
+//TOKENIZED_STOCK_MARKET_SYSTEM_USING_BLOCKCHAIN
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+// The Company Contract: Each company will now be an ERC-20 token and Ownable
+contract CompanyToken is ERC20, Ownable {
+    address public mother_contract;
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 initialSupply,
+        address _mother_contract
+    )
+        ERC20(_name, _symbol)
+        Ownable(_mother_contract) // Set the initial owner to the MotherContract
+    {
+        mother_contract = _mother_contract;
+        _mint(address(this), initialSupply); // Mint initial supply to the contract's own address
+    }
+
+    // Modifier to restrict minting and burning to only the MotherContract
+    modifier only_mother_contract() {
+        require(msg.sender == mother_contract, "Only the Mother Contract can mint or burn tokens");
+        _;
+    }
+
+    // Function to mint new tokens (only callable by the MotherContract)
+    function mint_tokens(uint256 amount) external only_mother_contract {
+        _mint(address(this), amount); // Mint tokens to the contract's own address
+    }
+
+    // Function to burn tokens (only callable by the MotherContract)
+    function burn_tokens(uint256 amount) external only_mother_contract {
+        require(balanceOf(address(this)) >= amount, "Insufficient tokens to burn");
+        _burn(address(this), amount); // Burn tokens from the contract's own address
+    }
+
+    // Add a receive function to accept Ether
+    receive() external payable {
+        // Allow this contract to accept Ether
+    }
+
+    // Function to withdraw Ether from the contract (only callable by the contract owner)
+    function withdrawEther(uint256 amount) external onlyOwner {
+        require(address(this).balance >= amount, "Insufficient Ether balance in contract");
+        payable(owner()).transfer(amount); // Transfer the specified amount of Ether to the owner
+    }
+
+    // Function to get the balance of the company's contract address
+    function get_contract_balance() public view returns (uint256) {
+        return balanceOf(address(this)); // Return the balance of tokens held by the company contract itself
+    }
+
+    // Function to get the Ether balance of the company contract
+    function getEtherBalance() public view returns (uint256) {
+        return address(this).balance; // Return the Ether balance of the contract
+    }
+}
+
+// The integrated MotherContract and TokenMarketplace contract
+contract MotherContractAndMarketplace is Ownable {
+    struct CompanyDetails {
+        string name;                // Company name
+        string symbol;              // Company symbol
+        address company_address;    // Address of the Company contract
+        uint256 initial_supply;     // Initial token supply
+        uint256 price_per_token;    // Price per token in Ether
+    }
+
+    CompanyDetails[] public companies;   // Array of all companies
+
+    struct SellOrder {
+        address seller;
+        uint256 amount;
+        uint256 price;  // Price per token for the sell order in Ether
+        bool isActive;  // Status of the order
+    }
+
+    struct BuyOrder {
+        address buyer;
+        uint256 amount;
+        uint256 paidEther;  // Ether sent with the buy order
+        bool isActive;      // Status of the order
+    }
+
+    mapping(address => SellOrder[]) public sellOrders;  // User's sell orders
+    mapping(address => BuyOrder[]) public buyOrders;    // User's buy orders
+    mapping(address => uint256) public companyTokenQueue; // Queued tokens for buy orders
+
+    // Event to notify the creation of a new company
+    event CompanyCreated(string name, address company_address, uint256 initial_supply, uint256 price_per_token);
+    // Event to notify when a sell order is placed
+    event SellOrderPlaced(address indexed seller, uint256 amount, uint256 price);
+    // Event to notify when a buy order is placed
+    event BuyOrderPlaced(address indexed buyer, uint256 amount);
+
+    // Constructor to set the owner
+    constructor() Ownable(msg.sender) {}
+
+    // Function to create a new company and deploy a new ERC-20 token (CompanyToken contract)
+    function create_company(
+        string memory _name,
+        string memory _symbol,
+        uint256 initial_supply,
+        uint256 price_per_token // Price per token in Ether
+    ) public onlyOwner {
+        require(initial_supply > 0, "Initial supply must be greater than zero");
+        require(price_per_token > 0, "Price per token must be greater than zero");
+
+        // Deploy new CompanyToken contract with the initial supply
+        CompanyToken new_company = new CompanyToken(_name, _symbol, initial_supply, address(this));
+
+        companies.push(CompanyDetails({
+            name: _name,
+            symbol: _symbol,
+            company_address: address(new_company),
+            initial_supply: initial_supply,
+            price_per_token: price_per_token
+        }));
+
+        // Emit event after creation
+        emit CompanyCreated(_name, address(new_company), initial_supply, price_per_token);
+    }
+
+    // Function to mint additional tokens in a specific company contract
+    function mint_company_tokens(uint256 _company_index, uint256 amount) public onlyOwner {
+        require(_company_index < companies.length, "Company does not exist");
+        address payable contractAddress = payable(companies[_company_index].company_address); // Casting to payable
+        CompanyToken(contractAddress).mint_tokens(amount);
+    }
+
+    // Function to burn tokens in a specific company contract
+    function burn_company_tokens(uint256 _company_index, uint256 amount) public onlyOwner {
+        require(_company_index < companies.length, "Company does not exist");
+        address payable contractAddress = payable(companies[_company_index].company_address); // Casting to payable
+        CompanyToken(contractAddress).burn_tokens(amount);
+    }
+
+    // Function to get the balance of a specific company contract
+    function get_company_balance(uint256 _company_index) public view returns (uint256) {
+        require(_company_index < companies.length, "Company does not exist");
+        address contractAddress = companies[_company_index].company_address;
+        return CompanyToken(payable(contractAddress)).get_contract_balance(); // Cast to payable before calling
+    }
+
+    // Function to get the Ether balance of a company contract
+    function get_company_ether_balance(uint256 _company_index) public view returns (uint256) {
+        require(_company_index < companies.length, "Company does not exist");
+        address contractAddress = companies[_company_index].company_address;
+        return CompanyToken(payable(contractAddress)).getEtherBalance(); // Cast to payable before calling
+    }
+
+    // Function to place a sell order for a specific company
+    function placeSellOrder(uint256 companyIndex, uint256 amount) public {
+        require(companyIndex < companies.length, "Invalid company index");
+        require(amount > 0, "Amount must be greater than zero");
+
+        CompanyToken companyTokenContract = CompanyToken(payable(companies[companyIndex].company_address));
+        require(companyTokenContract.balanceOf(msg.sender) >= amount, "Insufficient tokens to place sell order");
+        require(companyTokenContract.transferFrom(msg.sender, address(this), amount), "Token transfer failed");
+
+        sellOrders[msg.sender].push(SellOrder({
+            seller: msg.sender,
+            amount: amount,
+            price: companies[companyIndex].price_per_token,
+            isActive: true
+        }));
+
+        emit SellOrderPlaced(msg.sender, amount, companies[companyIndex].price_per_token);
+        processBatchBuyOrders(companyIndex, 5); // Process buy orders in batches of 5
+    }
+
+    // Function to place a buy order for a specific company
+    function placeBuyOrder(uint256 companyIndex, uint256 amount) public payable {
+        require(companyIndex < companies.length, "Invalid company index");
+        require(amount > 0, "Amount must be greater than zero");
+
+        uint256 totalPrice = amount * companies[companyIndex].price_per_token;
+        require(msg.value >= totalPrice, "Insufficient Ether sent");
+
+        // Save the buy order in the mapping
+        buyOrders[msg.sender].push(BuyOrder({
+            buyer: msg.sender,
+            amount: amount,
+            paidEther: msg.value,
+            isActive: true
+        }));
+
+        emit BuyOrderPlaced(msg.sender, amount);
+    }
+
+    // Function to execute buy orders when tokens become available from sell orders
+    function executeBuyOrdersInBatches(uint256 companyIndex, uint256 batchSize) internal {
+        CompanyToken companyTokenContract = CompanyToken(payable(companies[companyIndex].company_address));
+
+        uint256 orderCount = buyOrders[msg.sender].length;
+        uint256 batchEnd = batchSize > orderCount ? orderCount : batchSize;
+
+        for (uint256 i = 0; i < batchEnd; i++) {
+            BuyOrder storage buyOrder = buyOrders[msg.sender][i];
+
+            if (!buyOrder.isActive) continue;
+
+            if (companyTokenContract.get_contract_balance() >= buyOrder.amount) {
+                // Fulfill the buy order if enough tokens are available
+                companyTokenContract.transfer(buyOrder.buyer, buyOrder.amount);
+                payable(address(companyTokenContract)).transfer(buyOrder.paidEther); // Transfer Ether to company
+                buyOrder.isActive = false; // Mark the order as completed
+            } else {
+                break; // Stop if not enough tokens to fulfill the next order
+            }
+        }
+    }
+
+    // External function to allow batch processing of buy orders
+    function processBatchBuyOrders(uint256 companyIndex, uint256 batchSize) public {
+        executeBuyOrdersInBatches(companyIndex, batchSize);
+    }
+}
