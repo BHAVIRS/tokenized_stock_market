@@ -27,29 +27,6 @@ This project is a **Solidity-based platform** that allows the creation, minting,
 - Ethereum-compatible development environment (e.g., [Remix](https://remix.ethereum.org), Hardhat, Truffle)
 - [MetaMask](https://metamask.io) or any other Ethereum wallet for deployment and interaction.
 
-## Getting Started
-
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/BHAVIRS/tokenized_stock_market.git
-    cd your-repo
-    ```
-
-2. **Install dependencies** (if using Hardhat or Truffle):
-    ```bash
-    npm install
-    ```
-
-3. **Deploy Contracts**:
-   - Deploy the `MotherContractAndMarketplace` contract, which acts as the main interface for creating and managing company tokens.
-   - Use the `create_company` function to deploy new `CompanyToken` contracts for specific companies.
-
-4. **Interaction with the Marketplace**:
-   - **Place Buy Orders**: Purchase tokens using Ether and receive the tokens immediately if available.
-   - **Place Sell Orders**: Sell your tokens by transferring them to the marketplace at the set company price.
-
-5. **Gas Optimization**:
-   - Infinite gas issues in Remix can be addressed by carefully optimizing your functions. Functions requiring large loops should be avoided, and efficient gas usage patterns are implemented for token transfers and marketplace actions.
 
 ## Smart Contract Overview
 
