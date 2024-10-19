@@ -38,7 +38,6 @@ This project is a **decentralized tokenization platform** built with Solidity, d
 
 ### Prerequisites
 - **Solidity**: `^0.8.0` or later
-- **Node.js** and **npm** for project dependencies (if using Hardhat or Truffle)
 - **MetaMask** or any Ethereum-compatible wallet for contract interaction
 - **OpenZeppelin Contracts** (ERC-20, Ownable)
 
@@ -58,14 +57,6 @@ This project is a **decentralized tokenization platform** built with Solidity, d
 - **placeSellOrder**: Users place a sell order to sell tokens back to the marketplace.
 - **convertEtherToToken**: Calculates the price conversion between Ether and tokens for a specific company.
 
-## Testing
-
-For running tests, you can use frameworks like **Hardhat** or **Truffle**:
-1. Write test cases to simulate buy/sell orders, token minting, and Ether withdrawals.
-2. Run tests using:
-    ```bash
-    npx hardhat test
-    ```
 
 ## Roles in the Project
 The following roles have been defined to manage and develop the project:
