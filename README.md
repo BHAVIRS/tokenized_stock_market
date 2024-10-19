@@ -90,7 +90,7 @@ Contributions are welcome! Feel free to:
 - Fork the repo and create pull requests for new features or improvements.
 
 ## License
-This project is licensed under the **MIT License**. Please see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the **MIT License**. Please see the [LICENSE](https://github.com/remy/mit-license.git) file for details.
 
 ## Contact
 For questions or feedback, please contact **bhavithranravi@gmail.com**
